@@ -13,14 +13,7 @@ Install from the newest dev version in the master branch: (CURRENT BUG!)
 
 Reading the Docs
 ----------------
-After Installing:
-
-.. code::
-
-  cd docs
-  make html
-  
-Then direct your browser to ``Composite-Plate/docs/_build/html/index.html``
+Head on over to http://composite-plate.readthedocs.org/en/latest/
 
 Testing
 -------
