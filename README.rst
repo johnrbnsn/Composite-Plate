@@ -5,11 +5,11 @@ A Python library for performing basic composite plate calculations.
 
 Installing
 ----------
-Install from the newest dev version in the master branch: (CURRENT BUG!)
+Install from the newest dev version in the master branch:
 
 .. code::
   
-  pip install git+https://github.com/jr226atbuffaloedu/Composite-Plate.git
+  pip install git+https://github.com/johnrbnsn/Composite-Plate.git
 
 Reading the Docs
 ----------------
