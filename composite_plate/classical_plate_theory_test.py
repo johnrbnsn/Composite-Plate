@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from composite_plate import Ply, InputError, Laminae, Laminate
+from classical_plate_theory import Ply, InputError, Laminae, Laminate
 
 class TestCompositePlateClasses(unittest.TestCase):
     """ Defines a series of tests for the CompositePlate Module
