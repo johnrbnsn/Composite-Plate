@@ -31,20 +31,22 @@ do this, you must define the composite plate in the following way.
 
 Example: ::
     
+    >>> import composite_plate.classical_plate_theory as cpt
+
     >>> E1      = 133.44;   # Modulus in fiber direction        [GPa]
     >>> E2      = 8.78;     # Modulus in transverse direction   [GPa]
     >>> G12     = 3.254;    # Shear Modulus                     [GPa]
     >>> nu12    = 0.26;     # Poissons Ratio (principal)        [   ]
     >>> h       = 6;        # Ply thickness                     [mm]
 
-    >>> ply = composite_plate.Ply(E1=E1,E2=E2,G12=G12,nu12=nu12,h=h)
-    
+    >>> ply = cpt.Ply(E1=E1,E2=E2,G12=G12,nu12=nu12,h=h)
+
     >>> theta_deg = 45;     # Orientation (+ from X)            [deg]
     >>> theta_rad = theta_deg*np.pi/180.0;    #                 [rad]
-    
-    >>> laminae1 = composite_plate.Laminae(ply, theta_rad);            
-    >>> laminae2 = composite_plate.Laminae(ply,-theta_rad);
-    
+
+    >>> laminae1 = cpt.Laminae(ply, theta_rad);            
+    >>> laminae2 = cpt.Laminae(ply,-theta_rad);
+
     >>> laminate = composite_plate.Laminate([laminae1, laminae2])
     
 After the laminate is created, you can then apply strains and see the 
@@ -57,7 +59,7 @@ Example: ::
     >>> force_and_moment_dict = laminate.applied_strain(Epsilon, Kappa)
     >>> N = force_and_moment_dict('N')
     >>> print("The forces are Nxx = {0}, Nyy = {1}, Nxy = {2}".format(N[1],N[2],N[3]))
-    
+
     >>> M = force_and_moment_dict('M')
     >>> print("The moments are Mxx = {0}, Myy = {1}, Mxy = {2}".format(M[1],M[2],M[3]))
 
@@ -65,6 +67,6 @@ Example: ::
 Modules
 =======
 
-.. automodule:: composite_plate
+.. automodule:: composite_plate.classical_plate_theory
     :members:
     :special-members:
