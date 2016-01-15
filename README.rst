@@ -13,6 +13,10 @@ Install from the newest dev version in the master branch:
 
 Reading the Docs
 ----------------
+.. image:: https://readthedocs.org/projects/composite-plate/badge/?version=latest
+  :target: http://composite-plate.readthedocs.org/en/latest/?badge=latest
+  :alt: Documentation Status
+  
 Head on over to http://composite-plate.readthedocs.org/en/latest/
 
 Testing
