@@ -10,6 +10,12 @@ Install from the newest dev version in the master branch:
 .. code::
   
   pip install git+https://github.com/johnrbnsn/Composite-Plate.git
+  
+Or place this in your requirements.txt:
+
+.. code::
+
+  git+https://github.com/johnrbnsn/Composite-Plate.git#egg=Composite-Plate
 
 Reading the Docs
 ----------------
