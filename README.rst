@@ -47,7 +47,11 @@ and then run:
 
 Testing
 -------
+.. image:: https://travis-ci.org/johnrbnsn/Composite-Plate.svg?branch=master
+    :target: https://travis-ci.org/johnrbnsn/Composite-Plate
+    
+Testing is done with :code:`unittest` and continuously checked via `travis-ci <https://travis-ci.org/johnrbnsn/Composite-Plate>`_.  Tests are based upon known textbook example problems (see test file for details).  
 
 License
 -------
-Released under MIT license, see ``LICENSE`` for details.
+Released under MIT license, see `LICENSE <https://github.com/johnrbnsn/Composite-Plate/blob/master/LICENSE>`_ for details.
