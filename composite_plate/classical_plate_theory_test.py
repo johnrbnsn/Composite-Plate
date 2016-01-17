@@ -240,7 +240,7 @@ class TestCompositePlateClasses(unittest.TestCase):
         Epsilon = strain_dictionary['Epsilon']
         Kappa = strain_dictionary['Kappa']
         
-        laminae_midplane_strains = laminate.laminae_midplane_strain(Epsilon, Kappa)  
+        laminae_midplane_strains = laminate.laminae_midplane_strain(Epsilon, Kappa)
         
         laminae_midplane_stresses = laminate.laminae_stress(Epsilon, Kappa)
         
@@ -248,7 +248,7 @@ class TestCompositePlateClasses(unittest.TestCase):
         self.assertMatrixAlmostEqualPercent(laminae_midplane_stresses[0],laminae_midplane_stress_expected)
         
         laminae_midplane_stress_expected = np.power(10.0,6.0)*np.matrix.transpose(np.matrix([8.33, 0.0, -2.09]))
-        self.assertMatrixAlmostEqualPercent(laminae_midplane_strains[1],laminae_midplane_stress_expected)
+        self.assertMatrixAlmostEqualPercent(laminae_midplane_stresses[1],laminae_midplane_stress_expected)
         
         
     def assertMatrixAlmostEqualPercent(self, matrix, matrix_expected, msg=None, percent=0.01, places=7):
@@ -263,16 +263,16 @@ class TestCompositePlateClasses(unittest.TestCase):
             matrix_expected_eq0 = []
             matrix_eq0 = []
             
-            matrix_expected_neq0 = matrix_expected.where(matrix_expected != 0.0)
-            import pdb; pdb.set_trace()
-            matrix_neq0 = [matrix[ind] for ind, x in enumerate(matrix_expected) if matrix_expected != 0.0]
-            # FIX THIS TEST!!!
+            matrix_expected_neq0 = matrix_expected[matrix_expected != 0.0]
+            matrix_neq0 = matrix[matrix_expected != 0.0]
+            matrix_expected_eq0 = matrix_expected[matrix_expected == 0.0]
+            matrix_eq0 = matrix[matrix_expected == 0.0]
             
-            if (matrix_expected_neq0):
-                self.assertMatrixAlmostEqualPercent(np.matrix(matrix_neq0), np.matrix(matrix_expected_neq0), msg=msg, percent=percent);
+            if (matrix_expected_neq0.any()):
+                self.assertMatrixAlmostEqualPercent(matrix_neq0, matrix_expected_neq0, msg=msg, percent=percent);
             
-            if (matrix_expected_eq0):
-                assertMatrixAlmostEqual(np.matrix(matrix_eq0), np.matrix(matrix_expected_eq0), msg=msg, places=places);
+            if (matrix_expected_eq0.any()):
+                assertMatrixAlmostEqual(matrix_eq0, matrix_expected_eq0, msg=msg, places=places);
             
             
         else:
@@ -287,7 +287,6 @@ class TestCompositePlateClasses(unittest.TestCase):
         self.assertEqual(matrix.size,matrix_expected.size)
         
         diff_norm_max = np.nanmax(np.abs(matrix_expected -matrix))
-        import pdb; pdb.set_trace()
         self.assertAlmostEqual(diff_norm_max,0.0,places=places, msg=msg, delta=delta)
         
         
