@@ -137,6 +137,60 @@ def rotation_matrix(_theta_rad):
     return np.matrix([[c2_theta, s2_theta, 2*s_c_theta],
         [s2_theta, c2_theta, -2*s_c_theta],
         [-s_c_theta, s_c_theta, c2_theta-s2_theta]]);
+        
+        
+class IsotropicLamina(object):
+    """ Isotropic layer to be used in a laminate 
+    
+    Composites can have isotropic (uniform properties) materials in addition to composite ply layers.  This class allows the user to define a material with equal properties in all directions and use this material to construct a composite plate with both types of materials.  Note for isotropic materials we have the constraint E = 2*G(1+nu), therefore only 2/3 of E, G and nu are required to define the material properties.
+    
+    Example:
+        
+        >>> E   = 10;       # Youngs Modulus    [GPa]
+        >>> G   = 3.3;      # Shear Modulus     [GPA]
+        >>> h   = 3;        # Layer Thickness   [mm]
+        >>> iso_layer = IsotropicLamina(E=E, G=G, h=h)
+    """
+    
+    def __repr__(self):
+        return("E:{0},nu:{1},h:{2}".format(E,nu,h))
+        
+    def __init__(self, E,G,h):
+        """ Initializes properties of the isotropic layer
+        
+        Units can be any set of self consistent units desired.
+        
+        Args:
+            E (float):      Youngs Modulus
+            G (float):      Shear Modulus
+            h (float):      Layer Thickness
+            
+        Attributes:
+            S_bar (numpy.matrix): Compliance matrix
+            
+        Exceptions:
+            InputError:     If any input value is not > 0
+        """
+        
+        if ((E>0.0) and (G>0.0) and (nu>0.0) and (h>0.0)):  # Check to be sure all inputs > 0
+            self.E      = E
+            self.G      = G
+            self.h      = h
+            self.nu     = G*(1+nu)            
+            
+            # Compliance Matrix
+            _E_inv = 1.0/self.E;
+            _G_inv = 1.0/self.G;
+            _nu_E = self.nu/self.E;
+            
+            # Compliance Matirx: Named S_bar (not S) for use in Laminate (aniostropic laminae compliance named S_bar, need to match both)
+            self.S_bar = np.matrix([        
+                [_E_inv, -_nu_E, 0.0],
+                [-_nu_E, _E_inv, 0.0],
+                [0.0, 0.0, _G_inv]]);
+            
+        else:
+            raise InputError('__init__()','An input value is not greater than 0!')
 
 class Laminae(object):
     """ Composite Laminae defined for each layer in a composite.
@@ -160,6 +214,7 @@ class Laminae(object):
             >>> theta_rad = theta_deg*np.pi/180.0;    #                 [rad]
             >>> laminae1 = Laminae(ply, theta_rad);
     """
+    
     
     def __repr__(self):
         return ("Ply: {0}, Angle {1} [deg]".format(self.ply,(self.theta_rad*180.0/np.pi)))
@@ -313,7 +368,7 @@ class Laminate(object):
         _laminae_z = [x-h_sum/2 for x in h]   # Make heights relative to midplane
         self.laminae_midplane_z = [0.5*(_laminae_z[ii+1]+_laminae_z[ii]) for ii in range(len(_laminae_z)-1)]  # Get height to midplane of each laminae
         
-        # Calculate Composite matrix
+        # Calculate Composite Stiffness matrix
         self.A = np.matrix([[0,0,0],[0,0,0],[0,0,0]]);
         self.B = self.A;
         self.D = self.A;
@@ -325,7 +380,7 @@ class Laminate(object):
             self.B = self.B +0.5*D_laminae*(np.power(_laminae_z[ii+1],2) -np.power(_laminae_z[ii],2));
             self.D = self.D +1.0/3.0*D_laminae*(np.power(_laminae_z[ii+1],3) -np.power(_laminae_z[ii],3));
             
-        # Calculate Inverse Stiffness matrices
+        # Calculate Compliance matrices
         _A_inv = np.linalg.inv(self.A)
         _D_inv = np.linalg.inv(self.D)
         _Dstar = self.D -self.B*_A_inv*self.B
