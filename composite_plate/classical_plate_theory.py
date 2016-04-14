@@ -18,7 +18,7 @@ class PlyFromFiber(object):
     based on the Fiber and matrix properties
     """
     
-    def __init__(self):
+    def __init__(self, E_f,D_f,EPD,nu_f, E_m,nu_m,t_p):
         """ Initialize the PlyFromFiber object, all member variables to 
         NaN
         
@@ -26,6 +26,13 @@ class PlyFromFiber(object):
         different estimated properties require different variables to be
         defined.  When using, define the required fiber and matrix values 
         for your property of interest, and then calculate the property.
+        
+        Inputs:
+            D_f:    Fiber Diameter
+            EPD:    Fiber Ends per decimeter
+            t_p:    Total Ply Thickness
+            nu_f:   Poissons ratio for fiber
+            nu_m:   Poissons ratio for matrix
         
         Member Variables:
             E_f:    Elastic modulus of the fiber
@@ -39,15 +46,15 @@ class PlyFromFiber(object):
             G_m:    Shear modulus of the matrix
         """
         # Fiber Properties
-        self.E_f = float('nan')
-        self.v_f = float('nan')
-        self.nu_f = float('nan')
+        self.E_f = E_f
+        self.v_f = EPD/100.0*D_f/t_p
+        self.nu_f = nu_f
         self.G_f = float('nan')
         
         # Matrix Properties
-        self.E_m = float('nan')
-        self.v_m = float('nan')
-        self.nu_m = float('nan')
+        self.E_m = E_m
+        self.v_m = 1.0 -self.v_f
+        self.nu_m = nu_m
         self.G_m = float('nan')
         
     def elastic_props(self):
