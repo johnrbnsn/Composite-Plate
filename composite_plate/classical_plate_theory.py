@@ -49,13 +49,13 @@ class PlyFromFiber(object):
         self.E_f = E_f
         self.v_f = EPD/100.0*D_f/t_p
         self.nu_f = nu_f
-        self.G_f = float('nan')
+        self.G_f = self.E_f/(2*(1.0 +self.nu_f))
         
         # Matrix Properties
         self.E_m = E_m
         self.v_m = 1.0 -self.v_f
         self.nu_m = nu_m
-        self.G_m = float('nan')
+        self.G_m = self.E_m/(2*(1.0 +self.nu_m))
         
     def elastic_props(self):
         """Calculates the elastic properties of the ply from the fiber 
@@ -66,8 +66,8 @@ class PlyFromFiber(object):
             self.E_m,self.v_m,self.nu_m,self.G_m]).any()):
             raise InputError('__init__()','A matrix of fiber elastic constant was not initialized!')
         else:        
-            self.E11 = self.E_f*self.v_f +self.E_m*self.v_m
-            self.E22 = E_f*E_m/(E_f*v_m +E_m*v_f)
+            self.E1 = self.E_f*self.v_f +self.E_m*self.v_m
+            self.E2 = E_f*E_m/(E_f*v_m +E_m*v_f)
             self.nu12 = self.nu_f*self.v_f +self.nu_m*self.v_m
             self.nu21 = self.E22/self.E11*self.nu12
             self.G12 = self.G_f*self.G_m/(self.G_f*self.v_m +self.G_m*self.v_f)
