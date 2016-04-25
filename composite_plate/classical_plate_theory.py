@@ -11,67 +11,6 @@ import numpy as np
 import string
 import unittest
 
-class PlyFromFiber(object):
-    """ Estimate ply properties from Fiber and Matrix properties
-    
-    Will provide estimates of various elastic and thermal ply properties
-    based on the Fiber and matrix properties
-    """
-    
-    def __init__(self, E_f,D_f,EPD,nu_f, E_m,nu_m,t_p):
-        """ Initialize the PlyFromFiber object, all member variables to 
-        NaN
-        
-        This initializes all possible member variables to NaN, since 
-        different estimated properties require different variables to be
-        defined.  When using, define the required fiber and matrix values 
-        for your property of interest, and then calculate the property.
-        
-        Inputs:
-            D_f:    Fiber Diameter
-            EPD:    Fiber Ends per decimeter
-            t_p:    Total Ply Thickness
-            nu_f:   Poissons ratio for fiber
-            nu_m:   Poissons ratio for matrix
-        
-        Member Variables:
-            E_f:    Elastic modulus of the fiber
-            v_f:    Volume fraction of the ply that is fiber
-            nu_f:   Poissons ratio of the fiber
-            G_f:    Shear modulus of the fiber
-            
-            E_m:    Elastic modulus of the matrix
-            v_m:    Volume fraction of the ply that is matrix
-            nu_m:   Poissons ratio of the matrix
-            G_m:    Shear modulus of the matrix
-        """
-        # Fiber Properties
-        self.E_f = E_f
-        self.v_f = EPD/100.0*D_f/t_p
-        self.nu_f = nu_f
-        self.G_f = self.E_f/(2*(1.0 +self.nu_f))
-        
-        # Matrix Properties
-        self.E_m = E_m
-        self.v_m = 1.0 -self.v_f
-        self.nu_m = nu_m
-        self.G_m = self.E_m/(2*(1.0 +self.nu_m))
-        
-    def elastic_props(self):
-        """Calculates the elastic properties of the ply from the fiber 
-            and matrix properties.
-            
-        """
-        if (np.isnan([self.E_f,self.v_f,self.nu_f,self.G_f,
-            self.E_m,self.v_m,self.nu_m,self.G_m]).any()):
-            raise InputError('__init__()','A matrix of fiber elastic constant was not initialized!')
-        else:        
-            self.E1 = self.E_f*self.v_f +self.E_m*self.v_m
-            self.E2 = E_f*E_m/(E_f*v_m +E_m*v_f)
-            self.nu12 = self.nu_f*self.v_f +self.nu_m*self.v_m
-            self.nu21 = self.E22/self.E11*self.nu12
-            self.G12 = self.G_f*self.G_m/(self.G_f*self.v_m +self.G_m*self.v_f)
-
 class Ply(object):    
     """ Defines a ply for a composite.  
     
@@ -122,6 +61,56 @@ class Ply(object):
             self.h      = h
         else:
             raise InputError('__init__()','An input value is not greater than 0!')
+            
+    @classmethod
+    def from_fiber_and_matrix(cls, E_f,d_f,EPD,nu_f, E_m,nu_m,t_p):
+        """ Initialize the Ply object from fiber and matrix properties
+        
+        This initializes all possible member variables to NaN, since 
+        different estimated properties require different variables to be
+        defined.  When using, define the required fiber and matrix values 
+        for your property of interest, and then calculate the property.
+        
+        Inputs:
+            d_f:    Fiber Diameter
+            EPD:    Fiber Ends per decimeter
+            t_p:    Total Ply Thickness
+            nu_f:   Poissons ratio for fiber
+            nu_m:   Poissons ratio for matrix
+        
+        Member Variables:
+            E_f:    Elastic modulus of the fiber
+            v_f:    Volume fraction of the ply that is fiber
+            nu_f:   Poissons ratio of the fiber
+            G_f:    Shear modulus of the fiber
+            
+            E_m:    Elastic modulus of the matrix
+            v_m:    Volume fraction of the ply that is matrix
+            nu_m:   Poissons ratio of the matrix
+            G_m:    Shear modulus of the matrix
+        """
+        # Fiber Properties
+        #self.E_f = E_f
+        v_f = EPD/100.0*d_f/t_p
+        #self.nu_f = nu_f
+        G_f = E_f/(2*(1+nu_f))      # Assuming isotropic material
+        
+        # Matrix Properties
+        #self.E_m = E_m
+        v_m = 1.0 -v_f
+        #self.nu_m = nu_m
+        G_m = E_m/(2*(1+nu_m))      # Assuming isotropic material
+        
+        if (np.isnan([E_f,v_f,nu_f,G_f, E_m,v_m,nu_m,G_m]).any()):
+            raise InputError('__init__()','A matrix of fiber elastic constant was not initialized!')
+        else:        
+            E11 = E_f*v_f +E_m*v_m
+            E22 = E_f*E_m/(E_f*v_m +E_m*v_f)
+            nu12 = nu_f*v_f +nu_m*v_m
+            nu21 = E22/E11*nu12
+            G12 = G_f*G_m/(G_f*v_m +G_m*v_f)   
+            
+            return cls(E11,E22,G12,nu12,h=t_p)
             
     def degree_of_isotropy(self):
         """Returns the degree of Isotropy of the Ply (E1/E2)
@@ -198,6 +187,18 @@ class IsotropicLamina(object):
             
         else:
             raise InputError('__init__()','An input value is not greater than 0!')
+    
+    @classmethod
+    def from_poisson(cls, E,nu,h):
+        """Defines an isotropic material using Youngs Modulus, Poissons ratio and thickness
+        """
+        
+        if ((E>0.0) and (nu>0.0) and (nu <=0.5) and (h > 0)):
+            G = E/(2.0*(1.0+nu))
+            
+            return cls(E,G,h)
+        else:
+            raise InputError('from_poisson()', 'An input value is not in the correct range! (all > 0, nu <= 0.5)')
 
 class Laminae(object):
     """ Composite Laminae defined for each layer in a composite.
