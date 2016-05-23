@@ -134,71 +134,6 @@ def rotation_matrix(_theta_rad):
         [s2_theta, c2_theta, -2*s_c_theta],
         [-s_c_theta, s_c_theta, c2_theta-s2_theta]]);
         
-        
-class IsotropicLamina(object):
-    """ Isotropic layer to be used in a laminate 
-    
-    Composites can have isotropic (uniform properties) materials in addition to composite ply layers.  This class allows the user to define a material with equal properties in all directions and use this material to construct a composite plate with both types of materials.  Note for isotropic materials we have the constraint E = 2*G(1+nu), therefore only 2/3 of E, G and nu are required to define the material properties.
-    
-    Example:
-        
-        >>> E   = 10;       # Youngs Modulus    [GPa]
-        >>> G   = 3.3;      # Shear Modulus     [GPA]
-        >>> h   = 3;        # Layer Thickness   [mm]
-        >>> iso_layer = IsotropicLamina(E=E, G=G, h=h)
-    """
-    
-    def __repr__(self):
-        return("E:{0},nu:{1},h:{2}".format(E,nu,h))
-        
-    def __init__(self, E,G,h):
-        """ Initializes properties of the isotropic layer
-        
-        Units can be any set of self consistent units desired.
-        
-        Args:
-            E (float):      Youngs Modulus
-            G (float):      Shear Modulus
-            h (float):      Layer Thickness
-            
-        Attributes:
-            S_bar (numpy.matrix): Compliance matrix
-            
-        Exceptions:
-            InputError:     If any input value is not > 0
-        """
-        
-        if ((E>0.0) and (G>0.0) and (nu>0.0) and (h>0.0)):  # Check to be sure all inputs > 0
-            self.E      = E
-            self.G      = G
-            self.h      = h
-            self.nu     = G*(1+nu)            
-            
-            # Compliance Matrix
-            _E_inv = 1.0/self.E;
-            _G_inv = 1.0/self.G;
-            _nu_E = self.nu/self.E;
-            
-            # Compliance Matirx: Named S_bar (not S) for use in Laminate (aniostropic laminae compliance named S_bar, need to match both)
-            self.S_bar = np.matrix([        
-                [_E_inv, -_nu_E, 0.0],
-                [-_nu_E, _E_inv, 0.0],
-                [0.0, 0.0, _G_inv]]);
-            
-        else:
-            raise InputError('__init__()','An input value is not greater than 0!')
-    
-    @classmethod
-    def from_poisson(cls, E,nu,h):
-        """Defines an isotropic material using Youngs Modulus, Poissons ratio and thickness
-        """
-        
-        if ((E>0.0) and (nu>0.0) and (nu <=0.5) and (h > 0)):
-            G = E/(2.0*(1.0+nu))
-            
-            return cls(E,G,h)
-        else:
-            raise InputError('from_poisson()', 'An input value is not in the correct range! (all > 0, nu <= 0.5)')
 
 class Laminae(object):
     """ Composite Laminae defined for each layer in a composite.
@@ -265,6 +200,32 @@ class Laminae(object):
         self.S_bar = R*np.linalg.inv(A)*np.linalg.inv(R)*S*A;
 
         self.Q_bar = np.linalg.inv(self.S_bar);
+        
+    @classmethod
+    def from_isotrpic(cls, E,nu,h):
+        """ Initializes properties of the isotropic layer
+        
+        Units can be any set of self consistent units desired.
+        
+        Args:
+            E (float):      Youngs Modulus
+            nu (float):     Poissons Ratio
+            h (float):      Layer Thickness
+            
+        Attributes:
+            S_bar (numpy.matrix): Compliance matrix
+            
+        Exceptions:
+            InputError:     If any input value is not > 0
+        """
+        
+        if ((E>0.0) and (nu>0.0) and (h>0.0)):  # Check to be sure all inputs > 0
+            G      = E/(2.0*(1.0 +nu))
+            ply = Ply(E,E,G,nu,h)
+            return cls(ply, 0.0)
+            
+        else:
+            raise InputError('__init__()','An input value is not greater than 0!')
 
 class Laminate(object):
     r""" A class defining a composite Laminate.  Input is as the composites 
